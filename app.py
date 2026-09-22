@@ -55,8 +55,9 @@ st.title("🅿️ Stellplatzdisposition: Wohin mit der ankommenden Wechselbrück
 st.markdown(
     """
 Eine Wechselbrücke kommt im Ankunftsfeld des Hofs an – in welche **Reihe** stellt man sie, wenn die Reihen **genestet** sind (mehrere Brücken hintereinander, nur von der Gassenseite erreichbar, LIFO)
-und man die **Abholzeit** vorab kennt? Diese Demo rechnet mit einer echten **Wegkettenrechnung** nach, ob sich ein Blick auf die Abholzeit beim Einparken lohnt – und korrigiert damit eine grobe
-Vorab-Schätzung (siehe "Wie funktioniert diese Demo?" und "📐 Mathematische Formulierung" weiter unten).
+und man die **Abholzeit** vorab kennt? Bei `stapelplanung-demo` und `blockzuweisung-demo` zahlt sich ein Blick auf die Zukunft aus – hier ist das **bewusst ein Gegenbeispiel**: Diese Demo rechnet
+mit einer echten **Wegkettenrechnung** nach, ob sich derselbe Gedanke auch beim Einparken lohnt, und korrigiert damit eine grobe Vorab-Schätzung, die "ja" sagte. Das Ergebnis fällt anders aus
+(siehe "Wie funktioniert diese Demo?" und "📐 Mathematische Formulierung" weiter unten).
 """
 )
 
@@ -109,7 +110,7 @@ res_n, res_l = result
 # ---------------------------------------------------------------------------------------------------
 # Hauptansicht
 # ---------------------------------------------------------------------------------------------------
-st.markdown("## 🎯 Wie viel Fahrstrecke spart vorausschauendes Einparken?")
+st.markdown("## 🎯 Lohnt sich vorausschauendes Einparken hier?")
 st.caption(f"{int(rows)} Reihen à Tiefe {int(depth)} (Kapazität {cap} Plätze); {int(n_items)} Ankünfte im {int(window)}-h-Fenster (Auslastung ~{util_est * 100:.0f} %, grobe Schätzung nach Little); "
            f"Schätzfehler σ = {int(sigma)} %. Angezeigt: Delta = vorausschauend minus nächster freier Platz.")
 
