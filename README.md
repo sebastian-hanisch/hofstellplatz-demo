@@ -1,10 +1,12 @@
 # Stellplatzdisposition auf dem Hof – Streamlit-Demo
 
+**[→ Demo live ausprobieren](https://sebastianhanisch-hofstellplatz-demo.streamlit.app/)**
+
 Interaktive Fall-Demo zur **Stellplatzdisposition im Ankunftsfeld** eines Hofs: Eine Wechselbrücke kommt an – in welche Reihe stellt man sie, wenn die Reihen **genestet** sind (mehrere Brücken
 hintereinander, nur von der Gassenseite erreichbar, LIFO) und man die **Abholzeit** vorab kennt? Zusatz zur Yard-Linie (`yard-demo`, das Fahraufträge zwischen Feldern entscheidet, aber Aufträgen bisher
 nur einen zufälligen Punkt zur Wegzeitberechnung zuweist – **keine** Kapazitäts- oder Belegungsprüfung je Stellplatz). Analogie zu `stapelplanung-demo` (horizontales Wegfahren statt vertikalem Kranhub).
 
-Teil des Portfolios für die Website „Sebastian Hanisch – Operations Research und Machine Learning“. Lokal gebaut bis zum Commit (siehe unten) – **nicht** gepusht, kein GitHub-Repo, nicht deployed.
+Teil des Portfolios für die Website „Sebastian Hanisch – Operations Research und Machine Learning“.
 
 ## Kernfrage
 
