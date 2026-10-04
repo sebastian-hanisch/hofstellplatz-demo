@@ -157,7 +157,7 @@ st.markdown("**H-Kurve: Gesamtstrecke je Auftrag über die Reihentiefe** (Kapazi
 h_key = (int(rows), int(depth), int(n_items), int(window), int(dwell), int(sigma))
 h_points = _compute_h_curve(h_key)
 st.plotly_chart(V.h_curve_figure(h_points), width="stretch", key="h_curve_chart")
-st.caption(f"Bei H=1 sind beide Regeln gleich (kein Unterschied, {C.H_CURVE_TRIALS} Instanzen je Punkt); ab H=2 kostet die vorausschauende Regel durchgehend mehr, mit wachsendem Abstand bei tieferer Nestung.")
+st.caption(f"Bei H=1 sind beide Regeln gleich (kein Unterschied, {C.H_CURVE_TRIALS} Instanzen je Punkt); ab H=2 kostet die vorausschauende Regel im gemessenen Bereich (Auslastung bis etwa 97 %) durchgehend mehr, mit wachsendem Abstand bei tieferer Nestung. Bei Überlast (Auslastung über 100 %, z. B. 90 Ankünfte in 8 h bei 100 min Standzeit auf 16 Plätzen) kann sie bei H=2 um wenige Meter je Auftrag billiger werden.")
 
 st.markdown("**σ-Kurve: Gesamtstrecke je Auftrag über den Schätzfehler** (bei der eingestellten Reihentiefe)")
 sigma_key = (int(rows), int(depth), int(n_items), int(window), int(dwell))
