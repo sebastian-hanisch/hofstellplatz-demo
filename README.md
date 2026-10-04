@@ -26,12 +26,13 @@ Sweep über R = 2..8, H = 2..4, Auslastung 50–97 %:
 | Bedingung | naiv (m) | vorausschauend (m) | Ersparnis vorausschauend | Vorab-Check (grob) |
 |---|---|---|---|---|
 | H=1, mittel | 101,1 | 101,1 | **0,0 %** | 0,0 % |
+| H=1, hoch | 105,2 | 105,2 | **0,0 %** | 0,0 % |
 | H=2, mittel | 63,3 | 66,6 | **−5,1 %** | +22,8 % |
 | H=2, hoch | 65,9 | 66,8 | **−1,5 %** | +17,9 % |
 | H=4, mittel | 40,2 | 48,4 | **−20,5 %** | +22,2 % |
 | H=4, hoch | 40,9 | 45,5 | **−11,1 %** | +12,1 % |
 
-Grund: Die naive Regel hat weiterhin 2–5× mehr Umsetzungen, aber jede einzelne ist mit der echten (direkten) Wegkette so billig, dass sich der Umweg, den die vorausschauende Regel bei der
+Grund: Die naive Regel hat weiterhin mehr Umsetzungen (in den Presets 1,3- bis 4,6-fach, im Sweep 1,1- bis 40-fach), aber jede einzelne ist mit der echten (direkten) Wegkette so billig, dass sich der Umweg, den die vorausschauende Regel bei der
 Einlagerung bewusst nimmt (sie meidet nahe Reihen), nicht mehr auszahlt. Der **H=1-Nullbefund bleibt unverändert** – das ist strukturell (keine Verdrängung möglich), unabhängig von der Distanzrechnung,
 und als hart kodierter Regressionstest abgesichert (`tests/test_evaluation.py::test_h1_exact_zero_difference_hardcoded`).
 
@@ -62,7 +63,7 @@ Abholzeit ohnehin.
 |---|---|---|---|
 | Offene Fläche | 16, H=1 | mittel | Grenzfall: keine Verdrängung, beide Regeln exakt gleich |
 | Leicht genestet | 8, H=2 | mittel | vorausschauend meidet nahe Reihen und zahlt drauf, trotz 3–5× weniger Umsetzungen |
-| Stark genestet, ruhig | 4, H=4 | mittel | größter gemessener Nachteil der vorausschauenden Regel |
+| Stark genestet, ruhig | 4, H=4 | mittel | größter Nachteil der vorausschauenden Regel unter den Presets |
 | Stark genestet, viel Verkehr | 4, H=4 | hoch | wie oben, Overflow wird spürbar |
 | Überlastet | 8, H=2 | hoch | Overflow ist hier der größere Hebel als die Einlagerungsregel |
 
@@ -99,3 +100,7 @@ Unit-Tests je Modul (u. a. `test_h1_exact_zero_difference_hardcoded` als Regress
 (`test_rules.py::test_hand_example_relocation_chain`), eine unabhängige Nachrechnung von Ablauf und Wegkette gegen `hst_simulation.simulate` über viele kleine Zufallsinstanzen
 (`test_reference_cross_check_many_small_instances`), ein Sensitivitätscheck mit umgekehrter Kandidatenreihenfolge (`test_lookahead_tiebreak_reversed_candidate_order`), AppTests mit
 `clean_cache`-Fixture, sowie `tools/mutation_check.py` (Fehler-Einbau-Test, PYTHONDONTWRITEBYTECODE=1, LF-Normalisierung).
+
+---
+
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zum Thema: [Hof- und Yard-Management optimieren](https://sebastianhanisch.net/yard-management-optimierung.html).

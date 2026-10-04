@@ -18,6 +18,7 @@ Wegkettenrechnung:
 | Bedingung | naiv (m) | vorausschauend (m) | Ersparnis vorausschauend | Vorab-Check (grob) |
 |---|---|---|---|---|
 | H=1, mittel | 101,1 | 101,1 | **0,0 %** (exakt gleich, wie erwartet) | 0,0 % |
+| H=1, hoch | 105,2 | 105,2 | **0,0 %** (exakt gleich) | 0,0 % |
 | H=2, mittel | 63,3 | 66,6 | **-5,1 %** | +22,8 % |
 | H=2, hoch | 65,9 | 66,8 | **-1,5 %** | +17,9 % |
 | H=4, mittel | 40,2 | 48,4 | **-20,5 %** | +22,2 % |
@@ -25,10 +26,10 @@ Wegkettenrechnung:
 
 Ein weiterer, breiter Sweep (R = 2..8, H = 2..4, Auslastung 50-97 %, `tools/tune_presets.py` sinngemäß,
 Skript im Session-Protokoll) findet in **keiner** getesteten Bedingung eine positive Ersparnis für
-"vorausschauend" - das beste gefundene Ergebnis liegt bei -1,4 % (R=8, H=2, Auslastung ~97 %), das
+"vorausschauend" - das beste gefundene Ergebnis liegt bei rund -1 bis -2 % (R=8, H=2, Auslastung ~97 %; je nach Instanzmenge -0,8 bis -1,7 %), das
 schlechteste bei -42 % (R=8, H=4, Auslastung ~50 %). **Die im Plan (Abschnitt 1, 7) und im
 Vorab-Check berichtete 12-23-%-Ersparnis hält mit der echten Wegkettenrechnung NICHT stand** - siehe
-README "Befunde/Korrekturen". Grund: die naive Regel hat zwar weiterhin 2-5× mehr Umsetzungen, aber
+README "Befunde/Korrekturen". Grund: die naive Regel hat zwar weiterhin mehr Umsetzungen (in den Presets 1,3- bis 4,6-fach, im Sweep 1,1- bis 40-fach), aber
 jede Umsetzung ist mit der echten (direkten) Wegkette so billig, dass sich der Umweg, den die
 vorausschauende Regel bei der Einlagerung in Kauf nimmt (sie meidet nahe Reihen bewusst), nicht mehr
 lohnt. Bei H=1 bleibt der Nullbefund unverändert (strukturell exakt, unabhängig vom Distanzmaß).

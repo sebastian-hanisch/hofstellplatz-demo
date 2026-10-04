@@ -65,7 +65,7 @@ st.caption("🎯 Schnellstart – ein Beispielszenario laden:")
 PRESET_HELP = {
     "Offene Fläche": "Der Grenzfall H=1: keine Verdrängung möglich, beide Regeln liefern für jede Instanz exakt denselben Plan.",
     "Leicht genestet": "8 Reihen à 2: die vorausschauende Regel meidet nahe Reihen und zahlt dafür drauf - trotz deutlich weniger Umsetzungen.",
-    "Stark genestet, ruhig": "4 Reihen à 4, mäßige Auslastung: der größte gemessene Nachteil der vorausschauenden Regel.",
+    "Stark genestet, ruhig": "4 Reihen à 4, mäßige Auslastung: der größte Nachteil der vorausschauenden Regel unter diesen Beispielen.",
     "Stark genestet, viel Verkehr": "Wie oben, aber hohe Auslastung: Overflow wird spürbar, der Nachteil der vorausschauenden Regel bleibt.",
     "Überlastet": "Hohe Auslastung bei leichter Nestung: Overflow ist hier der größere Hebel als die Einlagerungsregel.",
 }
@@ -234,7 +234,7 @@ Tor), die den Umsetz-Aufwand deutlich überschätzt hat.
 
 **Befund/Korrektur.** Der Vorab-Check hatte mit der groben Schätzung 12-23 % Ersparnis für die vorausschauende Regel gezeigt. Mit der echten Wegkettenrechnung ist eine Umsetzung so billig, dass sich
 der Umweg, den die vorausschauende Regel bei der Einlagerung nimmt, in **keiner** hier gemessenen Bedingung auszahlt (siehe tools/PRESET_SWEEP.md - ein Sweep über R=2..8, H=2..4, Auslastung 50-97 %
-findet höchstens -1,4 % "Ersparnis", also durchgehend einen Nachteil). Die naive Regel hat weiterhin deutlich mehr Umsetzungen (2-5×), aber jede einzelne ist real zu billig, damit sich das lohnt.
+findet bestenfalls rund -1 bis -2 % "Ersparnis", also durchgehend einen Nachteil). Die naive Regel hat weiterhin mehr Umsetzungen (in den Presets 1,3- bis 4,6-fach, im Sweep 1,1- bis 40-fach), aber jede einzelne ist real zu billig, damit sich das lohnt.
 Bei H=1 bleibt der Nullbefund unverändert - das ist eine strukturelle Eigenschaft (keine Verdrängung möglich), kein Ergebnis der Distanzrechnung.
 
 **Grenzen dieses Modells** (bewusst so gewählt, damit die Aussage ehrlich bleibt): nur eine Reihenrichtung (gassenseitig LIFO), keine Quer- oder Diagonalfahrten; kein exakter Referenzlöser (Optimum mit
@@ -275,6 +275,6 @@ st.markdown("---")
 
 st.caption(
     "Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – "
-    "Operations Research und Machine Learning. Interesse an einer maßgeschneiderten Lösung für "
-    "Ihr Unternehmen? [Kontakt aufnehmen](https://sebastianhanisch.net/kontakt.html)"
+    "Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). "
+    "Mehr zum Thema: [Hof- und Yard-Management optimieren](https://sebastianhanisch.net/yard-management-optimierung.html)."
 )
