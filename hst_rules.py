@@ -12,6 +12,8 @@ ist die Umsetz-Wegkette also 2 * Summe(leg_distance(r, n_i)) - die Rückfahrt na
 den nächsten Blockierer bzw. anschließend den Zielauftrag selbst zu greifen (dessen Anfahrt separat
 als "Anfahrt je Abholung" gezählt wird, siehe hst_simulation.py)."""
 
+import math
+
 import hst_constants as C
 
 
@@ -33,23 +35,26 @@ def place_nearest(rows, depth, _item=None):
 
 
 def place_lookahead(rows, depth, item):
-    """Vorausschauend: bevorzugt eine Reihe ohne Verdrängung (item.pickup_est <= min der Reihe);
-    darunter die mit der spätesten vordersten Abholzeit (möglichst eng), sonst kleinste Distanz;
-    ohne blockierfreie Reihe: insgesamt die mit der spätesten vordersten Abholzeit. Tie-Break
-    identisch zu place_nearest (Distanz, dann Reihenindex) - siehe test_rules.py (Sensitivität
-    mit umgekehrtem Tie-Break)."""
+    """Vorausschauend (Best-Fit wie stapelplanung-demo): unter den Reihen ohne Verdrängung
+    (item.pickup_est <= min der Reihe) die mit der KLEINSTEN vordersten Abholzeit (möglichst eng;
+    leere Reihen zählen als unendlich und kommen zuletzt), bei Gleichstand kleinste Distanz, dann
+    kleinster Reihenindex. Ohne verdrängungsfreie Reihe: die mit der größten vordersten Abholzeit
+    (kleinster Schaden). Tie-Break wie place_nearest - siehe test_rules.py (Sensitivität mit
+    umgekehrter Kandidatenreihenfolge)."""
     cand = _candidates(rows, depth)
     if not cand:
         return None
     non_blocking = [r for r in cand if not rows[r] or item.pickup_est <= min(o.pickup_est for o in rows[r])]
 
-    def key(r):
-        top = rows[r][-1].pickup_est if rows[r] else -1.0
-        return (-top, C.row_distance(r), r)
+    def key_tight(r):
+        return (rows[r][-1].pickup_est if rows[r] else math.inf, C.row_distance(r), r)
 
-    pool = non_blocking if non_blocking else cand
-    pool = sorted(pool, key=key)
-    return pool[0]
+    def key_least_damage(r):
+        return (-rows[r][-1].pickup_est, C.row_distance(r), r)
+
+    if non_blocking:
+        return min(non_blocking, key=key_tight)
+    return min(cand, key=key_least_damage)
 
 
 PLACERS = {C.POLICY_NEAREST: place_nearest, C.POLICY_LOOKAHEAD: place_lookahead}

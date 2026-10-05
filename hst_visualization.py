@@ -35,7 +35,7 @@ def yard_figure(n_rows, depth, occupancy, title):
 
 def h_curve_figure(points):
     """points: [(h, r, naiv_total, look_total), ...]"""
-    xs = [f"H={h}" for h, *_ in points]
+    xs = [f"H={h} ({r}×{h} = {r * h} Plätze)" for h, r, *_ in points]
     fig = go.Figure()
     fig.add_bar(name="Nächster freier Platz", x=xs, y=[p[2] for p in points], marker_color=C.COLOR_NAIVE)
     fig.add_bar(name="Vorausschauend", x=xs, y=[p[3] for p in points], marker_color=C.COLOR_LOOKAHEAD)

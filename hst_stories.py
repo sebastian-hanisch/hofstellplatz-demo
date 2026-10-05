@@ -2,9 +2,10 @@
 UND an der einen gezeigten Schicht (Seed aus hst_constants.PRESETS). Schwellen mit Abstand zu den
 gemessenen Werten (siehe tools/PRESET_SWEEP.md) - Muster blz_stories.py/stk_stories.py.
 
-WICHTIG (Befund/Korrektur, siehe README): mit der echten Wegkettenrechnung gewinnt die vorausschauende
-Regel in KEINER gemessenen Bedingung Gesamtstrecke - "savings" ist die Ersparnis von vorausschauend
-gegen naechster freier Platz und ist hier durchgehend <= 0 (naiv ist gleich gut oder billiger)."""
+WICHTIG (Befund/Korrektur, siehe README): mit der echten Wegkettenrechnung und der engsten Passung
+(Best-Fit) gewinnt die vorausschauende Regel nur bei H=2 und sehr hoher Auslastung knapp Gesamtstrecke;
+"savings" ist die Ersparnis von vorausschauend gegen naechster freier Platz (negativ = vorausschauend
+ist teurer) und liegt in den Presets zwischen -17 % und +2 %."""
 
 import hst_evaluation as E
 
@@ -36,13 +37,13 @@ def criteria(name, rows):
                 (of_n <= 0.10, f"Overflow moderat (<= 10 % der Ankünfte): {of_n * 100:.1f} %")]
     if name == "Leicht genestet":
         return [(naiv_total <= 68.0, f"naiv Gesamtstrecke <= 68 m: {naiv_total:.1f}"),
-                (sav <= -3.0, f"vorausschauend mindestens 3 % teurer: {sav:.1f} %"),
+                (abs(sav) <= 3.0, f"beide Regeln praktisch gleich teuer (|Unterschied| <= 3 %): {sav:.1f} %"),
                 (rf >= 3.0, f"naiv mindestens 3x mehr Umsetzungen als vorausschauend: Faktor {rf:.2f}")]
     if name == "Stark genestet, ruhig":
-        return [(sav <= -15.0, f"vorausschauend mindestens 15 % teurer (größte gemessene Spanne): {sav:.1f} %"),
+        return [(sav <= -12.0, f"vorausschauend mindestens 12 % teurer (größte gemessene Spanne): {sav:.1f} %"),
                 (rf >= 1.3, f"naiv mindestens 1,3x mehr Umsetzungen: Faktor {rf:.2f}")]
     if name == "Stark genestet, viel Verkehr":
-        return [(sav <= -8.0, f"vorausschauend mindestens 8 % teurer bei hoher Auslastung: {sav:.1f} %"),
+        return [(sav <= -5.0, f"vorausschauend mindestens 5 % teurer bei hoher Auslastung: {sav:.1f} %"),
                 (of_n >= 0.05, f"spürbarer Overflow bei hoher Auslastung (>= 5 %): {of_n * 100:.1f} %")]
     if name == "Überlastet":
         return [(of_n >= 0.08, f"Overflow dominiert (>= 8 % der Ankünfte): {of_n * 100:.1f} %"),

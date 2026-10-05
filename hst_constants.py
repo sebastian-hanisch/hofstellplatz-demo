@@ -28,7 +28,7 @@ DEPTH_DEFAULT = 2
 N_ITEMS_RANGE, N_ITEMS_DEFAULT = (30, 90), 55
 WINDOW_RANGE, WINDOW_DEFAULT = (4, 12), 8            # Schichtfenster (h)
 DWELL_RANGE, DWELL_DEFAULT = (40, 200), 100           # mittlere Standzeit (min)
-SIGMA_RANGE, SIGMA_DEFAULT, SIGMA_STEP = (0, 150), 0, 25   # Schätzfehler der Abholzeit (%); Default 0 (siehe tools/PRESET_SWEEP.md: sigma verschiebt nur, kippt nichts)
+SIGMA_RANGE, SIGMA_DEFAULT, SIGMA_STEP = (0, 150), 0, 25   # Schätzfehler der Abholzeit (%); Default 0 (siehe tools/PRESET_SWEEP.md: sigma macht die vorausschauende Regel teurer)
 SEED_RANGE, SEED_DEFAULT = (0, 9999), 42
 
 MIN_DWELL_MIN = 5.0                  # wie vorab_stellplatz/measure.py: Standzeit mindestens 5 min
@@ -58,18 +58,19 @@ POLICY_SHORT = {POLICY_NEAREST: "Nächster freier Platz", POLICY_LOOKAHEAD: "Vor
 POLICY_DESCRIPTIONS = {
     POLICY_NEAREST: "Die Reihe mit freiem Platz, die dem Tor am nächsten liegt (kleinste Distanz, dann kleinster Reihenindex). Ignoriert die Abholzeit vollständig - die Alltagsregel und "
                      "Referenz aller Deltas; entspricht dem heutigen impliziten yard-demo-Modell bei H=1.",
-    POLICY_LOOKAHEAD: "Bevorzugt eine Reihe, in der niemand Früheres verdrängt wird (geschätzte Abholzeit ≤ Minimum der Reihe); darunter die mit der spätesten vordersten Abholzeit (möglichst "
-                       "eng); sonst die Reihe mit der insgesamt spätesten vordersten Abholzeit. Nutzt die (mit Schätzfehler behaftete) Abholzeit, um spätere Umsetzungen zu vermeiden.",
+    POLICY_LOOKAHEAD: "Bevorzugt eine Reihe, in der niemand Früheres verdrängt wird (geschätzte Abholzeit ≤ Minimum der Reihe); darunter die mit der kleinsten vordersten Abholzeit "
+                       "(engste Passung, Best-Fit wie in stapelplanung-demo; leere Reihen zuletzt); sonst die Reihe mit der insgesamt spätesten vordersten Abholzeit. Nutzt die (mit Schätzfehler behaftete) "
+                       "Abholzeit, um spätere Umsetzungen zu vermeiden.",
 }
 
 # --- Presets (5 Stück, 3+2 im Hauptbereich; siehe tools/PRESET_SWEEP.md) -------------------------
 # WICHTIG: mit der echten Wegkettenrechnung (AP 0) hält die im Vorab-Check geschätzte 12-23%-Ersparnis
 # des vorausschauenden Verfahrens NICHT stand - siehe README "Befunde/Korrekturen". Der Vorab-Check-Preset
-# "Unsicherer Blick voraus" entfällt deshalb: ohne anfänglichen Vorteil gibt es keinen Kipppunkt über
-# sigma zu zeigen (sigma macht das vorausschauende Verfahren nur gleichmäßig noch teurer, siehe
-# tools/PRESET_SWEEP.md) - sigma bleibt als Regler, aber ohne eigenes Preset.
+# "Unsicherer Blick voraus" entfällt deshalb: der einzige Vorteil (R=8, H=2, Auslastung 97 %, +1,8 %) ist
+# klein und kippt schon bei sigma=25 % (siehe tools/PRESET_SWEEP.md) - sigma bleibt als Regler, aber ohne
+# eigenes Preset.
 _BASE = dict(rows=ROWS_DEFAULT, depth=DEPTH_DEFAULT, n_items=N_ITEMS_DEFAULT, window=WINDOW_DEFAULT, dwell=DWELL_DEFAULT, sigma=0, seed=SEED_DEFAULT)
-_PRESET_SEED = 10   # gemeinsamer Seed für alle Presets (Sweep: 66 von 300 Kandidaten-Seeds erfüllen alle Kriterien beider hochausgelasteten Presets zugleich, siehe tools/PRESET_SWEEP.md)
+_PRESET_SEED = 68   # gemeinsamer Seed für alle Presets (Sweep: 6 von 300 Kandidaten-Seeds erfüllen die Kriterien aller fünf Presets zugleich, siehe tools/PRESET_SWEEP.md)
 PRESETS = {
     "Offene Fläche": dict(_BASE, rows=16, depth=1, n_items=55, seed=_PRESET_SEED),
     "Leicht genestet": dict(_BASE, rows=8, depth=2, n_items=55, seed=_PRESET_SEED),

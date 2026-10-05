@@ -21,7 +21,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PY = sys.executable
 WITH_APP = "--with-app" in sys.argv
 TIMEOUT = 240
-TEST_ORDER = ["test_scenario.py", "test_rules.py", "test_simulation.py", "test_evaluation.py", "test_presets.py", "test_stories.py", "test_visualization.py", "test_pdf_export.py"]
+TEST_ORDER = ["test_scenario.py", "test_rules.py", "test_simulation.py", "test_evaluation.py", "test_presets.py", "test_stories.py", "test_visualization.py", "test_pdf_export.py", "test_oracle_hofstellplatz.py"]
 
 MUTANTS = [
     # hst_constants.py
@@ -40,7 +40,9 @@ MUTANTS = [
     # hst_rules.py
     ("hst_rules.py", "cand.sort(key=lambda r: (C.row_distance(r), r))", "cand.sort(key=lambda r: (C.row_distance(r), -r))"),
     ("hst_rules.py", "non_blocking = [r for r in cand if not rows[r] or item.pickup_est <= min(o.pickup_est for o in rows[r])]", "non_blocking = [r for r in cand if not rows[r] or item.pickup_est < min(o.pickup_est for o in rows[r])]"),
-    ("hst_rules.py", "return (-top, C.row_distance(r), r)", "return (top, C.row_distance(r), r)"),
+    ("hst_rules.py", "return (rows[r][-1].pickup_est if rows[r] else math.inf, C.row_distance(r), r)", "return (-rows[r][-1].pickup_est if rows[r] else math.inf, C.row_distance(r), r)"),
+    ("hst_rules.py", "return (rows[r][-1].pickup_est if rows[r] else math.inf, C.row_distance(r), r)", "return (rows[r][-1].pickup_est if rows[r] else -math.inf, C.row_distance(r), r)"),
+    ("hst_rules.py", "return (-rows[r][-1].pickup_est, C.row_distance(r), r)", "return (rows[r][-1].pickup_est, C.row_distance(r), r)"),
     ("hst_rules.py", "blockers_deep_to_front = stack[pos + 1:]", "blockers_deep_to_front = stack[pos:]"),
     ("hst_rules.py", "return list(reversed(blockers_deep_to_front))", "return list(blockers_deep_to_front)"),
     ("hst_rules.py", "extra_dist += 2.0 * C.leg_distance(r, new_r)", "extra_dist += C.leg_distance(r, new_r)"),

@@ -5,9 +5,12 @@ Aufruf (im Projektordner): ./venv/Scripts/python.exe tools/tune_presets.py <modu
   population   Grundgesamtheit (Seeds 100000-100299, wie hst_constants.SAMPLE_SEED_BASE): Kriterien
                aller Presets, Kennzahlen je Regel, Reloc-Faktor, Overflow-Anteil.
   shown        die gezeigte Schicht (Seed aus PRESETS): Kriterien und Lage in der Grundgesamtheit.
-  sigma        Sweep über den Schätzfehler sigma (Bedingung "Leicht genestet"): prüft, ob es einen
-               Kipppunkt gibt (siehe README "Befunde/Korrekturen") - es gibt keinen, sigma macht die
-               vorausschauende Regel nur gleichmäßig teurer.
+  sigma        Sweep über den Schätzfehler sigma (Bedingungen "Leicht genestet" und "Überlastet", je 300
+               Instanzen): "Leicht genestet" fällt monoton, bei "Überlastet" kippt der kleine Vorteil bei
+               sigma = 25 % (siehe README "Befunde/Korrekturen").
+  conditions   die sechs Bedingungen des Vorab-Checks (H=1/2/4, mittel/hoch, Kapazität 16, 300 Instanzen).
+  sweep        breiter Sweep R = 2..8, H = 2..4, Auslastung 50-97 % (126 Zellen je 300 Instanzen, sigma = 0;
+               rund 10 Minuten): Zahl der Zellen mit klarem Vorteil / ohne klaren Unterschied / klarem Nachteil.
 
 Grundsätze wie in den anderen Hafen-/Baumbasierte-Demos: den Preset-Seed nicht nach der schönsten
 Einzelschicht wählen, sondern prüfen, dass er die Population repräsentiert; deterministisch, ohne
@@ -54,15 +57,43 @@ def cmd_shown():
 
 
 def cmd_sigma():
-    p = C.PRESETS["Leicht genestet"]
-    base = E.Params(p["rows"], p["depth"], p["n_items"], p["window"], p["dwell"], 0)
-    for sg in C.SIGMA_CURVE_POINTS:
-        pp = E.Params(base.rows, base.depth, base.n_items, base.window, base.dwell, sg)
-        rows = E.sample(pp, 200, base_seed=700000)
-        sav = ST.savings_pct(rows)
-        print(f"  sigma={sg:4d}%  savings(vorausschauend)={sav:7.2f} %")
+    for name in ("Leicht genestet", "Überlastet"):
+        p = C.PRESETS[name]
+        print(f"### {name}")
+        for sg in C.SIGMA_CURVE_POINTS:
+            pp = E.Params(p["rows"], p["depth"], p["n_items"], p["window"], p["dwell"], sg)
+            rows = E.sample(pp, POP_TRIALS)
+            print(f"  sigma={sg:4d}%  savings(vorausschauend)={ST.savings_pct(rows):7.2f} %  ({E.verdict(rows)[0]})")
+
+
+def cmd_conditions():
+    for h, r in ((1, 16), (2, 8), (4, 4)):
+        for label, n in (("mittel", 55), ("hoch", 75)):
+            rows = E.sample(E.Params(r, h, n, C.WINDOW_DEFAULT, C.DWELL_DEFAULT, 0), POP_TRIALS)
+            print(f"H={h}, {label:6s}  naiv={E.mean([x.naiv_total for x in rows]):6.1f} m  look={E.mean([x.look_total for x in rows]):6.1f} m  "
+                  f"savings={ST.savings_pct(rows):6.1f} %  ({E.verdict(rows)[0]})")
+
+
+def cmd_sweep():
+    cells = []
+    for r in range(2, 9):
+        for h in (2, 3, 4):
+            for util in (0.5, 0.6, 0.7, 0.8, 0.9, 0.97):
+                # mittlere Belegung = n * Standzeit / Fenster; Auslastung = Belegung / Kapazität
+                n = max(2, round(util * r * h * C.WINDOW_DEFAULT * 60 / C.DWELL_DEFAULT))
+                rows = E.sample(E.Params(r, h, n, C.WINDOW_DEFAULT, C.DWELL_DEFAULT, 0), POP_TRIALS)
+                cells.append((r, h, util, n, ST.savings_pct(rows), ST.reloc_factor(rows), E.verdict(rows)[0]))
+    verdicts = {v: sum(1 for c in cells if c[6] == v) for v in ("besser", "unklar", "schlechter")}
+    print(f"{len(cells)} Zellen: {verdicts}")
+    for h in (2, 3, 4):
+        sv = [c[4] for c in cells if c[1] == h]
+        print(f"  H={h}: savings {min(sv):.1f} % bis {max(sv):.1f} %")
+    finite = [c[5] for c in cells if c[5] != float("inf")]
+    print(f"  Umsetz-Faktor naiv/vorausschauend {min(finite):.1f} bis {max(finite):.1f}")
+    print("  klar günstiger:", [(c[0], c[1], c[2], round(c[4], 1)) for c in cells if c[6] == "besser"])
+    print("  schlechteste Zelle:", min(cells, key=lambda c: c[4]))
 
 
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "population"
-    {"population": cmd_population, "shown": cmd_shown, "sigma": cmd_sigma}.get(mode, lambda: sys.exit(__doc__))()
+    {"population": cmd_population, "shown": cmd_shown, "sigma": cmd_sigma, "conditions": cmd_conditions, "sweep": cmd_sweep}.get(mode, lambda: sys.exit(__doc__))()

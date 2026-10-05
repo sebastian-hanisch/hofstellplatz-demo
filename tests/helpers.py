@@ -30,7 +30,7 @@ def brute_force_relocation_cost(r_old, new_rows):
 def reference_simulate(items, n_rows, depth, policy):
     """Unabhängige Nachrechnung von Ablauf und Wegkette - anderer Code als hst_rules.py/
     hst_simulation.py (keine PLACERS, kein retrieve()), aber dieselbe Fachlogik: LIFO-Reihen,
-    nächster freier Platz nach (Distanz, Index), vorausschauend nach (verdrängungsfrei, "eng"),
+    nächster freier Platz nach (Distanz, Index), vorausschauend nach Best-Fit (verdrängungsfrei, engste Passung),
     Umsetzen per nächster freier Platz mit echter (direkter) Wegkette. Rückgabe: dict mit
     retrieval_dist_sum, n_pickups, relocations, relocation_extra_dist, overflow."""
     rows = [[] for _ in range(n_rows)]
@@ -58,12 +58,18 @@ def reference_simulate(items, n_rows, depth, policy):
         if not cand:
             return None
         non_block = [r for r in cand if not rows[r] or item.pickup_est <= min(o.pickup_est for o in rows[r])]
-        pool = non_block if non_block else cand
-        best = pool[0]
-        for r in pool[1:]:
-            top_best = rows[best][-1].pickup_est if rows[best] else -1.0
-            top_r = rows[r][-1].pickup_est if rows[r] else -1.0
-            if (-top_r, dist(r), r) < (-top_best, dist(best), best):
+        # Best-Fit: verdrängungsfrei -> kleinste vorderste Abholzeit (leer = unendlich); sonst größte vorderste Abholzeit
+        if non_block:
+            best = non_block[0]
+            for r in non_block[1:]:
+                top_best = rows[best][-1].pickup_est if rows[best] else float("inf")
+                top_r = rows[r][-1].pickup_est if rows[r] else float("inf")
+                if (top_r, dist(r), r) < (top_best, dist(best), best):
+                    best = r
+            return best
+        best = cand[0]
+        for r in cand[1:]:
+            if (-rows[r][-1].pickup_est, dist(r), r) < (-rows[best][-1].pickup_est, dist(best), best):
                 best = r
         return best
 

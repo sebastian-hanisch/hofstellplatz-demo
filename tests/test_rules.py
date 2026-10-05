@@ -88,6 +88,27 @@ def test_place_lookahead_prefers_non_blocking_row():
     assert R.place_lookahead(rows, depth=2, item=newcomer) == 1
 
 
+def test_place_lookahead_picks_tightest_fit_not_loosest():
+    """Engste Passung (Best-Fit wie stapelplanung-demo): bei mehreren verdrängungsfreien Reihen gewinnt die mit der
+    KLEINSTEN vordersten Abholzeit >= eigener (hier 100), nicht die lockerste (900) und nicht die nächste am Tor."""
+    rows = [[_item(0, 0, 900)], [_item(1, 0, 300)], [_item(2, 0, 100)], []]
+    newcomer = _item(9, 0, pickup=50, pickup_est=50)
+    assert R.place_lookahead(rows, depth=2, item=newcomer) == 2
+
+
+def test_place_lookahead_empty_row_comes_last_among_non_blocking():
+    rows = [[], [_item(0, 0, 400)]]
+    newcomer = _item(9, 0, pickup=50, pickup_est=50)
+    assert R.place_lookahead(rows, depth=2, item=newcomer) == 1     # belegte, passende Reihe vor der leeren
+
+
+def test_place_lookahead_fallback_takes_latest_front_when_all_rows_block():
+    """Blockiert jede Reihe, kommt die mit der größten vordersten Abholzeit (kleinster Schaden) - hier Reihe 1."""
+    rows = [[_item(0, 0, 10)], [_item(1, 0, 40)], [_item(2, 0, 20)]]
+    newcomer = _item(9, 0, pickup=500, pickup_est=500)
+    assert R.place_lookahead(rows, depth=2, item=newcomer) == 1
+
+
 def test_place_lookahead_boundary_equal_pickup_is_non_blocking():
     """Randfall: pickup_est GLEICH dem Minimum der Reihe zählt als NICHT blockierend (<=, nicht <)
     - sonst würde die naehere Reihe bei exakter Gleichheit faelschlich als blockierend gelten."""
@@ -126,12 +147,15 @@ def test_lookahead_tiebreak_reversed_candidate_order():
             return None
         non_blocking = [r for r in cand if not rows[r] or item.pickup_est <= min(o.pickup_est for o in rows[r])]
 
-        def key(r):
-            top = rows[r][-1].pickup_est if rows[r] else -1.0
-            return (-top, C.row_distance(r), r)
+        def key_tight(r):
+            return (rows[r][-1].pickup_est if rows[r] else float("inf"), C.row_distance(r), r)
 
-        pool = non_blocking if non_blocking else cand
-        return sorted(pool, key=key)[0]
+        def key_least_damage(r):
+            return (-rows[r][-1].pickup_est, C.row_distance(r), r)
+
+        if non_blocking:
+            return sorted(non_blocking, key=key_tight)[0]
+        return sorted(cand, key=key_least_damage)[0]
 
     for seed in range(20):
         n_rows, depth = 4, 3

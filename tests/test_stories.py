@@ -29,9 +29,11 @@ def test_offene_flaeche_is_exact_not_approximate():
     assert all(r.naiv_total == r.look_total for r in rows)
 
 
-def test_savings_never_positive_for_vorausschauend_across_presets():
-    """Zentraler Befund dieser Demo (siehe README 'Befunde/Korrekturen'): die vorausschauende
-    Regel gewinnt in keinem der fünf Presets Gesamtstrecke."""
+def test_advantage_of_vorausschauend_stays_small_across_presets():
+    """Zentraler Befund dieser Demo (siehe README 'Befunde/Korrekturen'): mit der echten Wegkettenrechnung und der engsten
+    Passung spart die vorausschauende Regel in keinem der fünf Presets mehr als 5 % Gesamtstrecke, und bei H=4 ist sie klar teurer."""
     for name in C.PRESETS:
         rows = E.sample(_params(name), n_trials=120)
-        assert ST.savings_pct(rows) <= 1e-6, name
+        assert ST.savings_pct(rows) <= 5.0, name
+        if C.PRESETS[name]["depth"] == 4:
+            assert ST.savings_pct(rows) <= -3.0, name

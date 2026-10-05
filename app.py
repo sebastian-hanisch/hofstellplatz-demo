@@ -64,10 +64,10 @@ mit einer echten **Wegkettenrechnung** nach, ob sich derselbe Gedanke auch beim 
 st.caption("🎯 Schnellstart – ein Beispielszenario laden:")
 PRESET_HELP = {
     "Offene Fläche": "Der Grenzfall H=1: keine Verdrängung möglich, beide Regeln liefern für jede Instanz exakt denselben Plan.",
-    "Leicht genestet": "8 Reihen à 2: die vorausschauende Regel meidet nahe Reihen und zahlt dafür drauf - trotz deutlich weniger Umsetzungen.",
+    "Leicht genestet": "8 Reihen à 2: beide Regeln praktisch gleich teuer - die vorausschauende Regel braucht rund 6-mal weniger Umsetzungen, ihr Umweg bei der Einlagerung kostet aber ebenso viel.",
     "Stark genestet, ruhig": "4 Reihen à 4, mäßige Auslastung: der größte Nachteil der vorausschauenden Regel unter diesen Beispielen.",
     "Stark genestet, viel Verkehr": "Wie oben, aber hohe Auslastung: Overflow wird spürbar, der Nachteil der vorausschauenden Regel bleibt.",
-    "Überlastet": "Hohe Auslastung bei leichter Nestung: Overflow ist hier der größere Hebel als die Einlagerungsregel.",
+    "Überlastet": "Hohe Auslastung bei leichter Nestung: Overflow ist hier der größere Hebel als die Einlagerungsregel (die vorausschauende Regel liegt höchstens knapp vorn).",
 }
 preset_names = list(C.PRESETS.keys())
 for row in (preset_names[:3], preset_names[3:]):
@@ -92,8 +92,8 @@ with st.sidebar:
     window = st.slider("Schichtfenster (h)", *bounds("window_slider"), key="window_slider", help="Länge des Ankunftsfensters; Ankünfte darin gleichverteilt.")
     dwell = st.slider("mittlere Standzeit (min)", *bounds("dwell_slider"), key="dwell_slider", help="Parameter der Exponentialverteilung der Verweildauer (rechtsschief wie in vorab_stellplatz/measure.py).")
     sigma = st.slider("Schätzfehler der Abholzeit σ (%)", *bounds("sigma_slider"), step=C.SIGMA_STEP, key="sigma_slider",
-                      help="Wie ungenau die vom vorausschauenden Verfahren gesehene Abholzeit-Schätzung ist (die naive Regel ignoriert die Abholzeit ohnehin). Macht das vorausschauende Verfahren nur "
-                           "gleichmäßig teurer, kein Kipppunkt (siehe tools/PRESET_SWEEP.md).")
+                      help="Wie ungenau die vom vorausschauenden Verfahren gesehene Abholzeit-Schätzung ist (die naive Regel ignoriert die Abholzeit ohnehin). Macht das vorausschauende Verfahren "
+                           "teurer; ein kleiner Vorteil (R=8, H=2, Auslastung 97 %: +1,8 %) kippt schon bei σ=25 % (siehe tools/PRESET_SWEEP.md).")
     seed = st.number_input("Seed", *bounds("seed_input"), key="seed_input", step=1, help="Bestimmt Ankünfte, Standzeiten und den Schätzfehler der Schicht.")
     st.button("🎲 Neue Schicht", width="stretch", on_click=randomize_seed, help="Würfelt einen neuen Seed für die Schicht.")
 
@@ -149,15 +149,15 @@ st.markdown(
     """
 Kernfrage dieser Demo: Lohnt sich ein Blick auf die **Abholzeit** beim Einparken, wenn Reihen **genestet** sind? Die vorausschauende Regel meidet Reihen, in denen sie später etwas verdrängen müsste -
 das kostet eine längere **Anfahrt** jetzt, spart aber **Umsetzungen** später. Mit der **echten Wegkettenrechnung** (direkte Fahrt zwischen den Reihen, siehe "📐 Mathematische Formulierung") ist eine
-Umsetzung so billig, dass sich dieser Umweg in den gemessenen Bedingungen **nicht** auszahlt – anders als die grobe Schätzung eines Vorab-Checks nahelegte (Einzelheiten unten und im README).
+Umsetzung so billig, dass sich dieser Umweg in fast allen gemessenen Bedingungen **nicht** auszahlt (nur bei H=2 und sehr hoher Auslastung knapp, bis +1,9 %) – anders als die grobe Schätzung eines Vorab-Checks nahelegte (Einzelheiten unten und im README).
 """
 )
 
-st.markdown("**H-Kurve: Gesamtstrecke je Auftrag über die Reihentiefe** (Kapazität R·H bleibt fest)")
+st.markdown("**H-Kurve: Gesamtstrecke je Auftrag über die Reihentiefe** (Kapazität R·H bleibt näherungsweise fest: die Reihenzahl je Stufe wird auf eine ganze Zahl gerundet, die tatsächliche Kapazität steht unter jedem Balken)")
 h_key = (int(rows), int(depth), int(n_items), int(window), int(dwell), int(sigma))
 h_points = _compute_h_curve(h_key)
 st.plotly_chart(V.h_curve_figure(h_points), width="stretch", key="h_curve_chart")
-st.caption(f"Bei H=1 sind beide Regeln gleich (kein Unterschied, {C.H_CURVE_TRIALS} Instanzen je Punkt); ab H=2 kostet die vorausschauende Regel im gemessenen Bereich (Auslastung bis etwa 97 %) durchgehend mehr, mit wachsendem Abstand bei tieferer Nestung. Bei Überlast (Auslastung über 100 %, z. B. 90 Ankünfte in 8 h bei 100 min Standzeit auf 16 Plätzen) kann sie bei H=2 um wenige Meter je Auftrag billiger werden.")
+st.caption(f"Bei H=1 sind beide Regeln gleich (kein Unterschied, {C.H_CURVE_TRIALS} Instanzen je Punkt); bei H=2 liegt die vorausschauende Regel in den gemessenen Bedingungen (R=2..8, Auslastung 50-97 %, σ=0) zwischen 8,8 % teurer und 1,9 % günstiger (nur bei R=8 und Auslastung ab 90 % klar günstiger), ab H=3 in allen gemessenen Bedingungen teurer (H=3 um 1,9 bis 20,8 %, H=4 um 6,2 bis 32,2 %), mit wachsendem Abstand bei tieferer Nestung.")
 
 st.markdown("**σ-Kurve: Gesamtstrecke je Auftrag über den Schätzfehler** (bei der eingestellten Reihentiefe)")
 sigma_key = (int(rows), int(depth), int(n_items), int(window), int(dwell))
@@ -166,7 +166,8 @@ if int(depth) == 1:
     st.info("ℹ️ Bei H=1 gibt es nichts zu schätzen: kein Unterschied zwischen den Regeln, unabhängig von σ.")
 else:
     st.plotly_chart(V.sigma_curve_figure(sigma_points), width="stretch", key="sigma_curve_chart")
-    st.caption(f"Kein Kipppunkt: die vorausschauende Regel liegt schon bei σ=0 (perfekte Schätzung) über der naiven Regel; ein Schätzfehler macht sie nur gleichmäßig teurer ({C.SIGMA_CURVE_TRIALS} Instanzen je Punkt).")
+    st.caption(f"Meist ist die vorausschauende Regel schon bei σ=0 (perfekte Schätzung) nicht günstiger als die naive Regel, und ein Schätzfehler macht sie nur teurer. Ausnahme in den Messungen: R=8, H=2, Auslastung 90 % bzw. 97 % "
+               f"(+1,0 % bzw. +1,9 % bei σ=0); beim Preset „Überlastet“ ist der Vorteil bei σ=25 % schon weg (−1,6 %). {C.SIGMA_CURVE_TRIALS} Instanzen je Punkt.")
 
 st.markdown(f"**Stichprobe** ({C.SAMPLE_TRIALS_DEFAULT} andere Schichten mit den eingestellten Reglern, nicht Ihr Seed)")
 if st.button(f"📊 Stichprobe rechnen ({C.SAMPLE_TRIALS_DEFAULT} Schichten)", key="sample_button"):
@@ -225,7 +226,7 @@ Nur der **vorderste (gassenseitige) Platz** einer Reihe ist ohne Umsetzen erreic
 Grenzfall "offene Fläche": keine Verdrängung möglich, das ist exakt die implizite Annahme des heutigen `yard-demo`-Modells.
 
 **Zwei Regeln.** 🎯 **Nächster freier Platz** ignoriert die Abholzeit, nimmt die nächste Reihe mit Platz. 🔭 **Vorausschauend** bevorzugt eine Reihe, in der niemand Früheres verdrängt wird
-(geschätzte Abholzeit ≤ Minimum der Reihe); darunter die "engste" (späteste vorderste Abholzeit), sonst die insgesamt späteste. Holt man einen Auftrag ab, der nicht vorne steht, werden die
+(geschätzte Abholzeit ≤ Minimum der Reihe); darunter die "engste" (kleinste vorderste Abholzeit, Best-Fit wie in `stapelplanung-demo`; eine leere Reihe zuletzt), sonst die mit der insgesamt spätesten vordersten Abholzeit. Holt man einen Auftrag ab, der nicht vorne steht, werden die
 davorstehenden (später geparkten) Brücken zuerst per **nächster freier Platz** umgesetzt - für **beide** Regeln dieselbe Umsetz-Regel, damit der Vergleich nur die Einlagerungsentscheidung misst.
 
 **Die echte Wegkettenrechnung.** Alle Reihen liegen entlang desselben Zugangswegs. Eine Umsetzung fährt **direkt** von der alten in die neue Reihe (nicht übers Tor zurück) und wieder zurück, um den
@@ -233,8 +234,9 @@ nächsten Blockierer oder den Zielauftrag zu holen - siehe "📐 Mathematische F
 Tor), die den Umsetz-Aufwand deutlich überschätzt hat.
 
 **Befund/Korrektur.** Der Vorab-Check hatte mit der groben Schätzung 12-23 % Ersparnis für die vorausschauende Regel gezeigt. Mit der echten Wegkettenrechnung ist eine Umsetzung so billig, dass sich
-der Umweg, den die vorausschauende Regel bei der Einlagerung nimmt, in **keiner** hier gemessenen Bedingung auszahlt (siehe tools/PRESET_SWEEP.md - ein Sweep über R=2..8, H=2..4, Auslastung 50-97 %
-findet bestenfalls rund -1 bis -2 % "Ersparnis", also durchgehend einen Nachteil). Die naive Regel hat weiterhin mehr Umsetzungen (in den Presets 1,3- bis 4,6-fach, im Sweep 1,1- bis 40-fach), aber jede einzelne ist real zu billig, damit sich das lohnt.
+der Umweg, den die vorausschauende Regel bei der Einlagerung nimmt, nur in **2 von 126** gemessenen Bedingungen auszahlt (siehe tools/PRESET_SWEEP.md - ein Sweep über R=2..8, H=2..4, Auslastung 50-97 %,
+je 300 Instanzen, σ=0: beide Fälle bei R=8, H=2 und Auslastung 90 % bzw. 97 %, +1,0 % bzw. +1,9 %; 116 Bedingungen klar teurer, bis zu 32,2 %; 8 ohne klaren Unterschied). Die naive Regel hat weiterhin mehr Umsetzungen (in den Presets 1,4- bis 6,0-fach,
+im Sweep 1,2- bis 91,7-fach), aber jede einzelne ist real zu billig, damit sich das meist lohnt.
 Bei H=1 bleibt der Nullbefund unverändert - das ist eine strukturelle Eigenschaft (keine Verdrängung möglich), kein Ergebnis der Distanzrechnung.
 
 **Grenzen dieses Modells** (bewusst so gewählt, damit die Aussage ehrlich bleibt): nur eine Reihenrichtung (gassenseitig LIFO), keine Quer- oder Diagonalfahrten; kein exakter Referenzlöser (Optimum mit
@@ -250,8 +252,8 @@ with st.expander("📐 Mathematische Formulierung"):
 **Reihen und Distanz.** Reihen $r \in \{0, \dots, R-1\}$, $\text{dist}(r) = 20 + 15r$ Meter (Basisabstand 20 m, Reihenabstand 15 m). Reihentiefe $H$, Kapazität $R \cdot H$.
 
 **Einlagerung.** Nächster freier Platz: $\arg\min_r \text{dist}(r)$ unter Reihen mit freiem Platz (Tie-Break: kleinster Index). Vorausschauend: unter Reihen mit freiem Platz zuerst die ohne Verdrängung
-($\hat p_{\text{item}} \le \min_{o \in \text{Reihe}} \hat p_o$, mit $\hat p$ der - ggf. mit Schätzfehler behafteten - Abholzeit); darunter $\arg\max_r (\text{späteste vorderste } \hat p)$, sonst
-kleinste Distanz, dann kleinster Index; ohne verdrängungsfreie Reihe: insgesamt $\arg\max_r$ der spätesten vordersten $\hat p$.
+($\hat p_{\text{item}} \le \min_{o \in \text{Reihe}} \hat p_o$, mit $\hat p$ der - ggf. mit Schätzfehler behafteten - Abholzeit); darunter $\arg\min_r (\text{vorderste } \hat p)$ (engste Passung, eine leere Reihe
+zählt als $\infty$), bei Gleichstand kleinste Distanz, dann kleinster Index; ohne verdrängungsfreie Reihe: $\arg\max_r$ der vordersten $\hat p$ (kleinster Schaden).
 
 **Echte Wegkette bei Umsetzung.** Beim Abholen eines Auftrags an Reihe $r$, der nicht vorne steht, werden die $k$ davorstehenden Blockierer (Räumreihenfolge: vorderster zuerst) einzeln per nächster
 freier Platz in Reihen $n_1, \dots, n_k$ umgesetzt. Die Wegstrecke zwischen zwei Reihen ist $\text{leg}(a, b) = |\text{dist}(a) - \text{dist}(b)|$ (direkte Fahrt entlang des Zugangswegs, nicht übers
@@ -264,8 +266,8 @@ wenn bei Ankunft keine Reihe mit freiem Platz existiert.
 **Schätzfehler.** $\hat p = p + \varepsilon$, $\varepsilon \sim \mathcal N(0, (\sigma / 100 \cdot \bar d)^2)$ mit $\bar d$ der mittleren Standzeit, eigener Zufallsstrom (unabhängig von Ankunft und
 Standzeit, damit dieselbe Instanz bei unterschiedlichem $\sigma$ vergleichbar bleibt). Die naive Regel nutzt $\hat p$ nie.
 
-**Verifikation.** `tests/test_rules.py` prüft die Wegkette an Handbeispielen und gegen vollständiges Durchprobieren auf Kleinstinstanzen; `test_evaluation.py::test_h1_exact_equality` prüft den
-H=1-Nullbefund als hart kodierten Regressionstest.
+**Verifikation.** `tests/test_rules.py` prüft die Wegkette an Handbeispielen und gegen vollständiges Durchprobieren auf Kleinstinstanzen; `test_evaluation.py::test_h1_exact_zero_difference_hardcoded` prüft den
+H=1-Nullbefund als hart kodierten Regressionstest; `test_oracle_hofstellplatz.py` prüft die Wahl der engsten Passung gegen eine Brute-Force-Wahl über alle Reihen und den Ablauf gegen ein unabhängiges Positionsmodell.
 
 Implementiert in `hst_scenario.py` (Schicht, Schätzfehler), `hst_rules.py` (Regeln, Wegkette), `hst_simulation.py` (Ablauf, Kennzahlen) und `hst_evaluation.py` (Stichprobe, H-Kurve, σ-Kurve, Urteil).
         """
