@@ -130,11 +130,15 @@ def test_permalink_roundtrip():
     assert int(at2.sidebar.radio(key="depth_radio").value) == C.PRESETS["Stark genestet, ruhig"]["depth"]
 
 
-def test_new_shift_button_changes_seed(default_app):
+def test_new_shift_button_sets_the_seed_to_the_drawn_value(default_app, monkeypatch):
+    import random
     before = default_app.sidebar.number_input(key="seed_input").value
+    lo, hi = C.SEED_RANGE
+    drawn = before + 1 if before < hi else before - 1            # fester „Wurf“, sicher verschieden vom alten Seed
+    monkeypatch.setattr(random, "randint", lambda a, b: drawn)
     click(default_app, label="🎲 Neue Schicht")
     after = default_app.sidebar.number_input(key="seed_input").value
-    assert before != after or True   # Seed kann zufällig gleich bleiben; Hauptsache kein Crash (siehe assert in click())
+    assert after == drawn and after != before and lo <= after <= hi
 
 
 def test_sample_button_computes_and_shows_verdict():
