@@ -61,6 +61,17 @@ mit einer echten **Wegkettenrechnung** nach, ob sich derselbe Gedanke auch beim 
 """
 )
 
+# erklaerseite:einfach:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/hof-stellplatz-erklaert.json, nicht von Hand ändern)
+with st.expander("💬 In einfachen Worten"):
+    st.markdown(
+        """
+Auf einem Hof kommen Wechselbrücken an und müssen in eine von mehreren Reihen gestellt werden. In jeder Reihe stehen mehrere Brücken hintereinander, und nur die vorderste kommt ohne Umsetzen heraus. Die einfache Regel nimmt die nächste Reihe mit freiem Platz. Die vorausschauende Regel kennt die geplante Abholzeit und meidet Reihen, in denen die neue Brücke eine früher abzuholende zustellen würde. Die Demo spielt eine Schicht mit beiden Regeln durch und zählt die Strecke des Hoffahrzeugs einschließlich der Wege beim Umsetzen. Sie zeigt, wie sich der Unterschied mit Reihentiefe, Auslastung und Genauigkeit der Schätzung ändert, und dass sich der Blick voraus in den gemessenen Fällen meist nicht auszahlt.
+
+[Ausführlich und verständlich erklärt, mit Fachteil](https://sebastianhanisch.net/hof-stellplatz-erklaert.html)
+        """
+    )
+# erklaerseite:einfach:end
+
 st.caption("🎯 Schnellstart – ein Beispielszenario laden:")
 PRESET_HELP = {
     "Offene Fläche": "Der Grenzfall H=1: keine Verdrängung möglich, beide Regeln liefern für jede Instanz exakt denselben Plan.",
@@ -247,6 +258,25 @@ Umsetz-Regel ist nicht ausgeschlossen, aber nicht Teil dieser Version.
     )
 
 with st.expander("📐 Mathematische Formulierung"):
+    # erklaerseite:lesehilfe:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/hof-stellplatz-erklaert.json, nicht von Hand ändern)
+    st.markdown(
+        r"""
+**Lesehilfe.** Gegeben sind $R$ Reihen der Tiefe $H$ in wachsender Entfernung vom Tor, ankommende Brücken mit geschätzter Abholzeit $\hat p$ und eine feste Regel für das Umsetzen bei Blockade. Gesucht ist eine Einlagerungsregel, die jede Brücke einer Reihe zuweist, sodass die Gesamtstrecke je Auftrag $G$ aus Anfahrt und Umsetz-Wegkette klein bleibt.
+
+| Symbol | Bedeutung |
+|---|---|
+| $R$, $H$ | Zahl der Reihen bzw. Reihentiefe (Brücken hintereinander); Kapazität $R \cdot H$ |
+| $\text{dist}(r)$ | Entfernung der Reihe $r$ vom Tor in Metern, $20 + 15r$ |
+| $p$, $\hat p$ | wahre bzw. geschätzte Abholzeit |
+| $\sigma$ | Streuung des Schätzfehlers in Prozent der mittleren Standzeit |
+| $\text{leg}(a, b)$ | direkte Wegstrecke zwischen den Reihen $a$ und $b$ |
+| $k$, $n_i$ | Zahl der blockierenden Brücken bzw. Zielreihe des $i$-ten Blockierers |
+| $G$ | Gesamtstrecke je Auftrag (Anfahrt plus Umsetz-Wegkette) |
+
+[Schritt für Schritt erklärt, mit Herleitung und Literatur](https://sebastianhanisch.net/hof-stellplatz-erklaert.html#fachleute)
+        """
+    )
+    # erklaerseite:lesehilfe:end
     st.markdown(
         r"""
 **Reihen und Distanz.** Reihen $r \in \{0, \dots, R-1\}$, $\text{dist}(r) = 20 + 15r$ Meter (Basisabstand 20 m, Reihenabstand 15 m). Reihentiefe $H$, Kapazität $R \cdot H$.
