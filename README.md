@@ -38,7 +38,7 @@ und als hart kodierter Regressionstest abgesichert (`tests/test_evaluation.py::t
 
 **Weitere Korrekturen gegenüber dem freigegebenen Plan** (Abschnitt 15 "Offene Entscheidungen"):
 
-- **Preset "Unsicherer Blick voraus" entfällt.** Der einzige Vorteil (R = 8, H = 2, Auslastung 97 %, +1,8 %) ist klein und kippt schon bei σ = 25 %; bei „Leicht genestet“ (8×2, Auslastung 72 %) fällt die Ersparnis monoton von −0,8 % (σ = 0) auf −16,4 % (σ = 150 %). Ein Kipppunkt über den Schätzfehler σ trägt kein eigenes Preset (`tools/PRESET_SWEEP.md`). σ bleibt als Regler (0–150 %, Schritt 25), ohne eigenes Preset – damit sind es **5 Presets** (3+2), nicht 6.
+- **Preset "Unsicherer Blick voraus" entfällt.** Der einzige Vorteil (R = 8, H = 2, Auslastung 97 %, +1,8 %) ist klein und kippt schon bei σ = 25 %; bei „Leicht genestet“ (8×2, Auslastung 72 %) fällt die Ersparnis monoton von −0,8 % (σ = 0) auf −16,4 % (σ = 150 %). Ein Kipppunkt über den Schätzfehler σ bekommt kein eigenes Preset (`tools/PRESET_SWEEP.md`). σ bleibt als Regler (0–150 %, Schritt 25), ohne eigenes Preset – damit sind es **5 Presets** (3+2), nicht 6.
 - Die Kapazität der Presets orientiert sich weiterhin an der Vorab-Check-Größenordnung (16 Plätze bei den H=2/H=4-Bedingungen); das Preset "Überlastet" zeigt bewusst hohen Overflow (~10 % der
   Ankünfte) als eigenen Effekt neben der Einlagerungsregel, die übrigen Presets liegen bei ~2 % (realistisch, kein Dauerzustand).
 
